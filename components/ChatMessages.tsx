@@ -1,7 +1,9 @@
+
 'use client';
 import clsx from "clsx";
 import { Card, CardContent } from "@/components/ui/card";
-import { useRef, useLayoutEffect } from "react";
+import { formatChatTimestamp } from "@/lib/helper";
+import { useAutoScroll } from "@/hooks/useAutoScroll";
 
 export interface ChatMessage {
     id?: number;
@@ -17,43 +19,20 @@ export interface ChatMessage {
 
 interface ChatMessagesProps {
     messages: ChatMessage[];
-    userId: string;
+    username: string;
 }
-
-export function ChatMessages({ messages, userId }: Readonly<ChatMessagesProps>) {
-    const chatEndRef = useRef<HTMLDivElement>(null);
-
-    useLayoutEffect(() => {
-        chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages]);
-
+export function ChatMessages({ messages, username }: Readonly<ChatMessagesProps>) {
+    const chatEndRef = useAutoScroll([messages]);
     return (
-        <Card className="flex-1 w-full mb-4 border-none overflow-y-auto min-h-80 " >
+        <Card className="flex-1 w-full mb-4 border-none overflow-y-auto min-h-80 max-h-200" >
             <CardContent className="p-4">
                 {messages.map((msg, idx) => {
-                    // Support both userId and user_id for compatibility
-                    const msgUserId = msg.user_id || msg.userId || "";
-                    const isOwn = msgUserId === userId;
-                    // Prefer content, fallback to text
+                    const isOwn = msg.username && msg.username === username;
                     const messageText = msg.content ?? msg.text ?? "";
-                    // Format timestamp as 'Month Day, Year, HH:MM AM/PM'
-                    let displayTime = msg.timestamp;
-                    try {
-                        const d = new Date(msg.timestamp);
-                        if (!Number.isNaN(d.getTime())) {
-                            displayTime = d.toLocaleString('default', {
-                                month: 'long',
-                                day: 'numeric',
-                                year: 'numeric',
-                                hour: 'numeric',
-                                minute: '2-digit',
-                                hour12: true
-                            });
-                        }
-                    } catch { }
+                    const displayTime = formatChatTimestamp(msg.timestamp);
                     return (
                         <div
-                            key={msg.username + idx + (msg.timestamp || "")}
+                            key={msg.timestamp + idx}
                             className={clsx(
                                 "mb-3 flex",
                                 isOwn ? "justify-end" : "justify-start"

@@ -47,12 +47,12 @@ export default function Home() {
           <Badge variant={connected ? "default" : "destructive"}>
             Status: {connected ? "Connected" : "Not Connected"}
           </Badge>
-          <Badge variant="secondary">
-            User ID: {userId || "-"}
+          <Badge variant="outline">
+            Username: {username || "N/A"}
           </Badge>
         </div>
         {/* Chat Area */}
-        <ChatMessages messages={messages} userId={userId} />
+        <ChatMessages messages={messages} username={username} />
         {/* Message Input */}
         <ChatInput
           value={input}

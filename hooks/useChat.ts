@@ -2,6 +2,7 @@
 'use client';
 import { initialMessages } from "@/constants/chat";
 import { useState, useCallback } from "react";
+import { v4 as uuidv4 } from 'uuid';
 import { useWebSocket } from "./useWebSocket";
 
 
@@ -27,11 +28,29 @@ export function useChat() {
         try {
             const data = JSON.parse(event.data);
             console.log('[FRONTEND-MESSAGE]', data);
-            setMessages(prev => [...prev, data]);
+            // If the backend assigns a user_id to this client, update it
+            if (data.type === 'user_connected' && data.username === username && data.user_id && !userId) {
+                setUserId(data.user_id);
+            }
+            // Only add the message if it's not an echo of the last own message
+            setMessages(prev => {
+                // Only suppress if the last message is truly an echo (same user, username, type, and content)
+                if (
+                    prev.length > 0 &&
+                    data.userId === userId &&
+                    prev.at(-1)?.userId === userId &&
+                    prev.at(-1)?.username === username &&
+                    prev.at(-1)?.type === data.type &&
+                    prev.at(-1)?.text === data.content
+                ) {
+                    return prev;
+                }
+                return [...prev, data];
+            });
         } catch (err) {
             console.warn('[FRONTEND-MESSAGE][PARSE-ERROR]', event.data, err);
         }
-    }, []);
+    }, [userId, username]);
 
     const handleWsClose = useCallback(() => {
         setConnected(false);
@@ -48,8 +67,10 @@ export function useChat() {
     function handleConnect(e: React.FormEvent) {
         e.preventDefault();
         if (username.trim()) {
-            const newUserId = "u" + Math.floor(Math.random() * 1000);
-            setUserId(newUserId);
+            // Generate a UUID for the user if not already set
+            if (!userId) {
+                setUserId(uuidv4());
+            }
             setShowModal(false);
             // WebSocket will connect via useWebSocket
         }
@@ -70,17 +91,6 @@ export function useChat() {
         if (send) {
             send(JSON.stringify(msg));
         }
-        setMessages((prev) => [
-            ...prev,
-            {
-                id: prev.length > 0 ? prev.at(-1)!.id + 1 : 1,
-                type: msg.type,
-                username: msg.username,
-                userId: msg.user_id,
-                text: msg.content,
-                timestamp: msg.timestamp,
-            }
-        ]);
         setInput("");
     }
 
