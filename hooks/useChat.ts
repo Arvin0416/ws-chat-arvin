@@ -69,7 +69,7 @@ export function useChat() {
 
     const handleWsClose = useCallback(() => {
         setConnected(false);
-        showToast.info("Disconnected from chat server.");
+        showToast.error("Disconnected from chat server.");
     }, []);
 
     const handleWsError = useCallback((event: Event) => {
@@ -88,12 +88,12 @@ export function useChat() {
     function handleConnect(e: React.FormEvent) {
         e.preventDefault();
         if (username.trim()) {
-            // Generate a UUID for the user if not already set
+
             if (!userId) {
                 setUserId(uuidv4());
             }
             setShowModal(false);
-            // WebSocket will connect via useWebSocket
+
         }
     }
 
@@ -115,6 +115,15 @@ export function useChat() {
         setInput("");
     }
 
+    function handleDisconnect() {
+        if (ws) {
+            ws.close();
+        }
+        setConnected(false);
+        setShowModal(true);
+        showToast.info("Disconnected from chat server.");
+    }
+
     return {
         connected,
         userId,
@@ -129,5 +138,6 @@ export function useChat() {
         setInput,
         handleConnect,
         handleSend,
+        handleDisconnect,
     };
 }

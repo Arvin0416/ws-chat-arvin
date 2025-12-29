@@ -2,13 +2,15 @@
 
 import clsx from "clsx";
 import { Badge } from "@/components/ui/badge";
-import { RotateCw } from "lucide-react";
+import { CircleX, RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ChatMessage, ChatMessages } from "@/components/ChatMessages";
 import { ChatInput } from "@/components/ChatInput";
 import { ConnectModal } from "@/components/ConnectModal";
 import { useChat } from "@/hooks/useChat";
 import { useTheme } from "@/hooks/useTheme";
+import React from "react";
+import { ChatSkeleton } from "@/components/ChatSkeleton";
 
 
 
@@ -28,7 +30,17 @@ export default function Home() {
     setInput,
     handleConnect,
     handleSend,
+    handleDisconnect,
   } = useChat();
+  const [loading, setLoading] = React.useState(true);
+  React.useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 1200);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return <ChatSkeleton />;
+  }
 
   return (
     <div className={clsx("flex min-h-screen items-center justify-center bg-background")}>
@@ -52,14 +64,28 @@ export default function Home() {
                 <span className="text-gray-200 font-normal">Status:</span> {connected ? "Connected" : "Not Connected"}
               </Badge>
               {!connected && (
+                <div className="flex gap-2">
+                  <Button
+                    size="icon"
+                    className="w-fit px-4 rounded-full"
+                    aria-label="Reconnect"
+                    onClick={() => setShowModal(true)}
+                  >
+                    <RotateCw className="w-4 h-4" /> Reconnect
+                  </Button>
+
+                </div>
+              )}
+              {connected && (
                 <Button
                   size="icon"
                   className="w-fit px-4 rounded-full"
-                  aria-label="Reconnect "
-                  onClick={() => setShowModal(true)}
-
+                  aria-label="Disconnect"
+                  variant="destructive"
+                  onClick={handleDisconnect}
                 >
-                  <RotateCw className="w-4 h-4" /> Reconnect
+                  <CircleX className="w-4 h-4" />
+                  Disconnect
                 </Button>
               )}
             </div>
