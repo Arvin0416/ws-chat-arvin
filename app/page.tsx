@@ -2,7 +2,7 @@
 
 import clsx from "clsx";
 import { Badge } from "@/components/ui/badge";
-import { CircleX, RotateCw } from "lucide-react";
+import { CircleX, RotateCw, User, Hash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ChatMessage, ChatMessages } from "@/components/ChatMessages";
 import { ChatInput } from "@/components/ChatInput";
@@ -58,10 +58,14 @@ export default function Home() {
         </h1>
         <div className="w-full flex flex-col gap-2">
           {/* Status & User Info */}
-          <div className={clsx("flex w-full justify-between items-center mb-2 gap-2")}>
-            <div className="flex items-center gap-2">
-              <Badge variant={connected ? "default" : "destructive"} className="p-2 px-4">
-                <span className="text-gray-200 font-normal">Status:</span> {connected ? "Connected" : "Not Connected"}
+          <div className={clsx("flex flex-wrap w-full justify-between items-center mb-2 gap-2")}>
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant={connected ? "default" : "destructive"} className="p-2 px-4 flex items-center gap-2 bg-primary/20">
+                <span className={clsx(
+                  "inline-block w-2 h-2 rounded-full",
+                  connected ? "bg-green-500" : "bg-red-500"
+                )} />
+                {connected ? "Connected" : "Not Connected"}
               </Badge>
               {!connected && (
                 <div className="flex gap-2">
@@ -79,7 +83,7 @@ export default function Home() {
               {connected && (
                 <Button
                   size="icon"
-                  className="w-fit px-4 rounded-full"
+                  className="w-fit px-4 rounded-full bg-destructive/20"
                   aria-label="Disconnect"
                   variant="destructive"
                   onClick={handleDisconnect}
@@ -89,9 +93,16 @@ export default function Home() {
                 </Button>
               )}
             </div>
-            <Badge variant="outline" className="py-2 px-4 border-primary bg-primary/50 font-bold items-center justify-center">
-              <span className="text-gray-200 font-normal">Username: </span>{username || "N/A"}
-            </Badge>
+            <div className="flex gap-2 items-center">
+              <Badge variant="default" className="py-2 px-4 bg-primary/20 font-bold flex items-center gap-2 justify-center">
+                <User className="w-4 h-4" />
+                {username || "N/A"}
+              </Badge>
+              <Badge variant="default" className="py-2 px-4 font-bold bg-primary/20 flex items-center gap-2 justify-center">
+                <Hash className="w-4 h-4" />
+                {channel || "N/A"}
+              </Badge>
+            </div>
           </div>
           {/* Chat Area */}
           <ChatMessages messages={messages as ChatMessage[]} username={username} />

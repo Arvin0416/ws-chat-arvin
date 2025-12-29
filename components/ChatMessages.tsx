@@ -25,7 +25,7 @@ export function ChatMessages({ messages, username }: Readonly<ChatMessagesProps>
     const chatEndRef = useAutoScroll([messages]);
     return (
         <Card className="flex-1 w-full mb-4 border-none overflow-y-auto min-h-80 max-h-200" >
-            <CardContent className="p-4">
+            <CardContent className="px-4 py-1">
                 {messages.map((msg, idx) => {
                     const isOwn = msg.username && msg.username === username;
                     const messageText = msg.content ?? msg.text ?? "";

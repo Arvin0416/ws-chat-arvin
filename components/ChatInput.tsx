@@ -2,6 +2,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import clsx from "clsx";
 import { FormEvent } from "react";
+import { Send } from "lucide-react";
 
 interface ChatInputProps {
     value: string;
@@ -21,7 +22,7 @@ export function ChatInput({ value, onChange, onSend, disabled }: Readonly<ChatIn
                 disabled={disabled}
             />
             <Button type="submit" disabled={disabled || !value.trim()}>
-                Send
+                Send <Send className="h-4 w-4" />
             </Button>
         </form>
     );
