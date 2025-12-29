@@ -30,6 +30,17 @@ export function ChatMessages({ messages, username }: Readonly<ChatMessagesProps>
                     const isOwn = msg.username && msg.username === username;
                     const messageText = msg.content ?? msg.text ?? "";
                     const displayTime = formatChatTimestamp(msg.timestamp);
+
+                    // Custom color for special users
+                    let userClass = "";
+                    if (msg.username === "SystemHelper") {
+                        userClass = "bg-yellow-100 text-yellow-900 dark:bg-yellow-900 dark:text-yellow-100 border border-yellow-300";
+                    } else if (msg.username === "Developer") {
+                        userClass = "bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-100 border border-blue-300";
+                    } else if (msg.username === "ChatBot") {
+                        userClass = "bg-purple-100 text-purple-900 dark:bg-purple-900 dark:text-purple-100 border border-purple-300";
+                    }
+
                     return (
                         <div
                             key={msg.timestamp + idx}
@@ -42,8 +53,9 @@ export function ChatMessages({ messages, username }: Readonly<ChatMessagesProps>
                                 className={clsx(
                                     "max-w-xs px-4 py-2 rounded-lg shadow text-sm wrap-break-word",
                                     msg.type === "system" && "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100 text-center mx-auto",
-                                    msg.type !== "system" && isOwn && "bg-green-500 text-white dark:bg-green-600",
-                                    msg.type !== "system" && !isOwn && "bg-zinc-200 text-zinc-900 dark:bg-zinc-700 dark:text-zinc-100"
+                                    msg.type !== "system" && isOwn && "bg-green-100 text-green-900 dark:bg-green-900 dark:text-green-100 border border-green-300",
+                                    msg.type !== "system" && !isOwn && !userClass && "bg-zinc-200 text-zinc-900 dark:bg-zinc-700 dark:text-zinc-100",
+                                    userClass
                                 )}
                             >
                                 {msg.type !== "system" && (
