@@ -147,3 +147,23 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes typing {
+
+  0%,
+  80%,
+  100% {
+    transform: scale(0.7);
+    opacity: 0.5;
+  }
+
+  40% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+.typing-dot {
+  animation: typing 1.2s infinite cubic-bezier(.68, -0.55, .27, 1.55);
+  display: inline-block;
+}

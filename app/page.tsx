@@ -11,6 +11,7 @@ import { useChat } from "@/hooks/useChat";
 import { useTheme } from "@/hooks/useTheme";
 import React from "react";
 import { ChatSkeleton } from "@/components/ChatSkeleton";
+import { TypingAnimation } from "@/components/TypingAnimation";
 
 
 
@@ -106,6 +107,12 @@ export default function Home() {
           </div>
           {/* Chat Area */}
           <ChatMessages messages={messages as ChatMessage[]} username={username} />
+          {/* Typing Animation */}
+          {connected && input && (
+            <div className="flex w-full justify-start pl-2 ">
+              <TypingAnimation />
+            </div>
+          )}
           {/* Message Input */}
           <ChatInput
             value={input}
