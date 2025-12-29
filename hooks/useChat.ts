@@ -1,6 +1,5 @@
 
 'use client';
-import { initialMessages } from "@/constants/chat";
 import { useState, useCallback } from "react";
 import { v4 as uuidv4 } from 'uuid';
 import { useWebSocket } from "./useWebSocket";
@@ -12,7 +11,7 @@ export function useChat() {
     const [username, setUsername] = useState("");
     const [channel, setChannel] = useState("general");
     const [showModal, setShowModal] = useState(true);
-    const [messages, setMessages] = useState(initialMessages);
+    const [messages, setMessages] = useState([]);
     const [input, setInput] = useState("");
 
     // WebSocket URL (local development)
