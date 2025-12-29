@@ -123,7 +123,7 @@ export function useChat() {
         channel,
         setChannel,
         showModal,
-        setShowModal,
+        setShowModal: setShowModal as React.Dispatch<React.SetStateAction<boolean>>,
         messages,
         input,
         setInput,
