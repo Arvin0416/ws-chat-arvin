@@ -10,7 +10,7 @@ interface ChatInputProps {
     disabled?: boolean;
 }
 
-export function ChatInput({ value, onChange, onSend, disabled }: ChatInputProps) {
+export function ChatInput({ value, onChange, onSend, disabled }: Readonly<ChatInputProps>) {
     return (
         <form className={clsx("flex w-full gap-2")} onSubmit={onSend}>
             <Input

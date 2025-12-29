@@ -31,7 +31,6 @@ export function ChatMessages({ messages, username }: Readonly<ChatMessagesProps>
                     const messageText = msg.content ?? msg.text ?? "";
                     const displayTime = formatChatTimestamp(msg.timestamp);
 
-                    // Custom color for special users
                     let userClass = "";
                     if (msg.username === "SystemHelper") {
                         userClass = "bg-yellow-100 text-yellow-900 dark:bg-yellow-900 dark:text-yellow-100 border border-yellow-300";

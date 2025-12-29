@@ -11,7 +11,7 @@ interface ConnectModalProps {
     onConnect: (e: React.FormEvent) => void;
 }
 
-export function ConnectModal({ open, username, channel, onUsernameChange, onChannelChange, onConnect }: ConnectModalProps) {
+export function ConnectModal({ open, username, channel, onUsernameChange, onChannelChange, onConnect }: Readonly<ConnectModalProps>) {
     return (
         <Dialog open={open}>
             <DialogContent className="max-w-md">

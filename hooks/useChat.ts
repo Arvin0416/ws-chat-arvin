@@ -2,8 +2,18 @@
 'use client';
 import { useState, useCallback } from "react";
 import { v4 as uuidv4 } from 'uuid';
+import { showToast } from "@/components/ToastProvider";
 import { useWebSocket } from "./useWebSocket";
 
+
+type ChatMessage = {
+    type: string;
+    username: string;
+    user_id: string;
+    content: string;
+    timestamp?: string;
+    channel?: string;
+};
 
 export function useChat() {
     const [connected, setConnected] = useState(false);
@@ -11,7 +21,7 @@ export function useChat() {
     const [username, setUsername] = useState("");
     const [channel, setChannel] = useState("general");
     const [showModal, setShowModal] = useState(true);
-    const [messages, setMessages] = useState([]);
+    const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [input, setInput] = useState("");
 
     // WebSocket URL (local development)
@@ -21,6 +31,7 @@ export function useChat() {
     // Handlers for WebSocket events
     const handleWsOpen = useCallback(() => {
         setConnected(true);
+        showToast.success("Connected to chat server.");
     }, []);
 
     const handleWsMessage = useCallback((event: MessageEvent) => {
@@ -36,15 +47,20 @@ export function useChat() {
                 // Only suppress if the last message is truly an echo (same user, username, type, and content)
                 if (
                     prev.length > 0 &&
-                    data.userId === userId &&
-                    prev.at(-1)?.userId === userId &&
+                    data.user_id === userId &&
+                    prev.at(-1)?.user_id === userId &&
                     prev.at(-1)?.username === username &&
                     prev.at(-1)?.type === data.type &&
-                    prev.at(-1)?.text === data.content
+                    prev.at(-1)?.content === data.content
                 ) {
                     return prev;
                 }
-                return [...prev, data];
+                // Ensure timestamp is always a string
+                const safeData = {
+                    ...data,
+                    timestamp: typeof data.timestamp === 'string' ? data.timestamp : new Date().toISOString(),
+                };
+                return [...prev, safeData];
             });
         } catch (err) {
             console.warn('[FRONTEND-MESSAGE][PARSE-ERROR]', event.data, err);
@@ -53,6 +69,11 @@ export function useChat() {
 
     const handleWsClose = useCallback(() => {
         setConnected(false);
+        showToast.info("Disconnected from chat server.");
+    }, []);
+
+    const handleWsError = useCallback((event: Event) => {
+        showToast.error("WebSocket error occurred.");
     }, []);
 
     const { ws, send } = useWebSocket({
@@ -60,6 +81,7 @@ export function useChat() {
         onOpen: handleWsOpen,
         onMessage: handleWsMessage,
         onClose: handleWsClose,
+        onError: handleWsError,
         enabled: !!(username && channel && !showModal),
     });
 
