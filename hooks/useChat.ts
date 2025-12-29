@@ -3,16 +3,7 @@
 import { useState } from "react";
 import { showToast } from "@/components/ToastProvider";
 import { useWebSocket } from "./useWebSocket";
-
-
-type ChatMessage = {
-    type: string;
-    username: string;
-    user_id: string;
-    content: string;
-    timestamp?: string;
-    channel?: string;
-};
+import type { ChatMessage } from "@/types/chat";
 
 function handleWsOpen(setConnected: (v: boolean) => void) {
     setConnected(true);
@@ -40,7 +31,7 @@ export function useChat() {
     const wsUrl = !showModal && channel && username
         ? `${baseWsUrl}?channel=${channel}&username=${encodeURIComponent(username)}`
         : "";
-    // WebSocket event handler moved to module scope
+
     function handleWsMessage(event: MessageEvent, username: string, userId: string, setUserId: (id: string) => void, setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>) {
         try {
             const data = JSON.parse(event.data);
@@ -93,7 +84,7 @@ export function useChat() {
     }
 
     function handleDisconnect() {
-        ws?.close();
+        ws.current?.close();
         setConnected(false);
         setShowModal(true);
     }

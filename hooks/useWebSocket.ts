@@ -1,4 +1,5 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback } from 'react';
+import type { UseWebSocketProps as UseWebSocketParams } from '@/types/websocket';
 
 export function useWebSocket({
     url,
@@ -7,36 +8,44 @@ export function useWebSocket({
     onClose,
     onError,
     enabled = true,
-}: {
-    url: string;
-    onOpen?: (event: Event) => void;
-    onMessage?: (event: MessageEvent) => void;
-    onClose?: (event: CloseEvent) => void;
-    onError?: (event: Event) => void;
-    enabled?: boolean;
-}) {
+}: UseWebSocketParams) {
     const wsRef = useRef<WebSocket | null>(null);
+
+    const handlersRef = useRef({
+        onOpen,
+        onMessage,
+        onClose,
+        onError,
+    });
+
+    useEffect(() => {
+        handlersRef.current = { onOpen, onMessage, onClose, onError };
+    }, [onOpen, onMessage, onClose, onError]);
 
     useEffect(() => {
         if (!enabled) return;
+
         const ws = new WebSocket(url);
         wsRef.current = ws;
-        if (onOpen) ws.addEventListener("open", onOpen);
-        if (onMessage) ws.addEventListener("message", onMessage);
-        if (onClose) ws.addEventListener("close", onClose);
-        if (onError) ws.addEventListener("error", onError);
+
+        const { onOpen, onMessage, onClose, onError } = handlersRef.current;
+
+        if (onOpen) ws.addEventListener('open', onOpen);
+        if (onMessage) ws.addEventListener('message', onMessage);
+        if (onClose) ws.addEventListener('close', onClose);
+        if (onError) ws.addEventListener('error', onError);
+
         return () => {
             ws.close();
             wsRef.current = null;
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [url, enabled]);
 
     const send = useCallback((data: string) => {
-        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        if (wsRef.current?.readyState === WebSocket.OPEN) {
             wsRef.current.send(data);
         }
     }, []);
 
-    return { ws: wsRef.current, send };
+    return { ws: wsRef, send };
 }

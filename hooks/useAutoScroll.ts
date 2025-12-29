@@ -1,10 +1,11 @@
-import { useRef, useLayoutEffect } from "react";
+import { useRef, useLayoutEffect } from 'react';
 
-export function useAutoScroll(deps: unknown[] = []) {
+export function useAutoScroll(trigger: unknown) {
     const chatEndRef = useRef<HTMLDivElement>(null);
+
     useLayoutEffect(() => {
-        chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, deps);
+        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [trigger]);
+
     return chatEndRef;
 }
