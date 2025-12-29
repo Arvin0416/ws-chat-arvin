@@ -49,7 +49,7 @@ export default function Home() {
           <div className={clsx("flex w-full justify-between items-center mb-2 gap-2")}>
             <div className="flex items-center gap-2">
               <Badge variant={connected ? "default" : "destructive"} className="p-2 px-4">
-                Status: {connected ? "Connected" : "Not Connected"}
+                <span className="text-gray-200 font-normal">Status:</span> {connected ? "Connected" : "Not Connected"}
               </Badge>
               {!connected && (
                 <Button
@@ -63,8 +63,8 @@ export default function Home() {
                 </Button>
               )}
             </div>
-            <Badge variant="outline" className="p-2 px-4 border-primary text-accent font-bold">
-              Username: {username || "N/A"}
+            <Badge variant="outline" className="py-2 px-4 border-primary bg-primary/50 font-bold items-center justify-center">
+              <span className="text-gray-200 font-normal">Username: </span>{username || "N/A"}
             </Badge>
           </div>
           {/* Chat Area */}

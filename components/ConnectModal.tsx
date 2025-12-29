@@ -1,6 +1,8 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Value } from "@radix-ui/react-select";
 
 interface ConnectModalProps {
     open: boolean;
@@ -28,14 +30,24 @@ export function ConnectModal({ open, username, channel, onUsernameChange, onChan
                         required
                         autoFocus
                     />
-                    <Input
-                        id="channel"
-                        type="text"
-                        placeholder="Channel"
+                    <Select
                         value={channel}
-                        onChange={onChannelChange}
-                        required
-                    />
+                        onValueChange={value => {
+                            const event = {
+                                target: { value: value }
+                            } as React.ChangeEvent<HTMLInputElement>;
+                            onChannelChange(event);
+                        }}
+                    >
+                        <SelectTrigger id="channel" className="w-full">
+                            <SelectValue placeholder="Select channel" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="general">#general</SelectItem>
+                            <SelectItem value="random">#random</SelectItem>
+                            <SelectItem value="help">#help</SelectItem>
+                        </SelectContent>
+                    </Select>
                     <Button type="submit" className="w-full">Connect</Button>
                 </form>
             </DialogContent>
