@@ -144,7 +144,7 @@ export default function Home() {
           </Badge>
         </div>
         {/* Chat Area */}
-        <Card className="flex-1 w-full mb-4 border border-zinc-200 dark:border-zinc-700 overflow-y-auto" style={{ minHeight: 320, maxHeight: 400 }}>
+        <Card className="flex-1 w-full mb-4 border-none overflow-y-auto" style={{ minHeight: 320, maxHeight: 400 }}>
           <CardContent className="p-4">
             {messages.map((msg) => (
               <div
