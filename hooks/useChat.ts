@@ -1,7 +1,6 @@
 
 'use client';
-import { useState, useRef } from "react";
-import { v4 as uuidv4 } from 'uuid';
+import { useState } from "react";
 import { showToast } from "@/components/ToastProvider";
 import { useWebSocket } from "./useWebSocket";
 
@@ -15,6 +14,19 @@ type ChatMessage = {
     channel?: string;
 };
 
+function handleWsOpen(setConnected: (v: boolean) => void) {
+    setConnected(true);
+    showToast.success("Connected to chat server.");
+}
+
+function handleWsClose(setConnected: (v: boolean) => void) {
+    setConnected(false);
+    showToast.error("Disconnected from chat server.");
+}
+
+function handleWsError() {
+    showToast.error("WebSocket error occurred.");
+}
 export function useChat() {
     const [connected, setConnected] = useState(false);
     const [userId, setUserId] = useState("");
@@ -23,37 +35,20 @@ export function useChat() {
     const [showModal, setShowModal] = useState(true);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [input, setInput] = useState("");
-    const lastOwnMessageRef = useRef<ChatMessage | null>(null);
 
-    // WebSocket URL (local development)
-    // Only connect when modal is closed (after clicking Connect)
-    const wsUrl = !showModal && channel && username ? `ws://localhost:8080/ws?channel=${channel}&username=${encodeURIComponent(username)}` : "";
-
-    // WebSocket event handlers
-    function handleWsOpen() {
-        setConnected(true);
-        showToast.success("Connected to chat server.");
-    }
-
-    function handleWsMessage(event: MessageEvent) {
+    const baseWsUrl = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8080/ws";
+    const wsUrl = !showModal && channel && username
+        ? `${baseWsUrl}?channel=${channel}&username=${encodeURIComponent(username)}`
+        : "";
+    // WebSocket event handler moved to module scope
+    function handleWsMessage(event: MessageEvent, username: string, userId: string, setUserId: (id: string) => void, setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>) {
         try {
             const data = JSON.parse(event.data);
-            // If the backend assigns a user_id to this client, update it
+
             if (data.type === 'user_connected' && data.username === username && data.user_id && !userId) {
                 setUserId(data.user_id);
             }
-            // Only add the message if it's not an echo of the last own message
             setMessages(prev => {
-                if (
-                    prev.length > 0 &&
-                    data.user_id === userId &&
-                    prev.at(-1)?.user_id === userId &&
-                    prev.at(-1)?.username === username &&
-                    prev.at(-1)?.type === data.type &&
-                    prev.at(-1)?.content === data.content
-                ) {
-                    return prev;
-                }
                 const safeData = {
                     ...data,
                     timestamp: typeof data.timestamp === 'string' ? data.timestamp : new Date().toISOString(),
@@ -65,20 +60,12 @@ export function useChat() {
         }
     }
 
-    function handleWsClose() {
-        setConnected(false);
-        showToast.error("Disconnected from chat server.");
-    }
-
-    function handleWsError() {
-        showToast.error("WebSocket error occurred.");
-    }
 
     const { ws, send } = useWebSocket({
         url: wsUrl,
-        onOpen: handleWsOpen,
-        onMessage: handleWsMessage,
-        onClose: handleWsClose,
+        onOpen: () => handleWsOpen(setConnected),
+        onMessage: (event: MessageEvent) => handleWsMessage(event, username, userId, setUserId, setMessages),
+        onClose: () => handleWsClose(setConnected),
         onError: handleWsError,
         enabled: Boolean(username && channel && !showModal),
     });
@@ -86,7 +73,7 @@ export function useChat() {
     function handleConnect(e: React.FormEvent) {
         e.preventDefault();
         if (!username.trim()) return;
-        if (!userId) setUserId(uuidv4());
+
         setShowModal(false);
     }
 
@@ -109,7 +96,6 @@ export function useChat() {
         ws?.close();
         setConnected(false);
         setShowModal(true);
-        showToast.info("Disconnected from chat server.");
     }
 
     return {
