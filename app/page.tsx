@@ -1,65 +1,199 @@
-import Image from "next/image";
+"use client";
+import { useRef, useLayoutEffect, useState, useEffect } from "react";
+import clsx from "clsx";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
+
+const initialMessages = [
+  {
+    id: 1,
+    type: "system",
+    username: "System",
+    userId: "system",
+    text: "Welcome to the general channel!",
+    timestamp: "2025-12-29 10:00:00",
+  },
+  {
+    id: 2,
+    type: "user_connected",
+    username: "Jane",
+    userId: "u456",
+    text: "Jane has joined the chat.",
+    timestamp: "2025-12-29 10:01:00",
+  },
+  {
+    id: 3,
+    type: "message",
+    username: "Jane",
+    userId: "u456",
+    text: "Hi there!",
+    timestamp: "2025-12-29 10:01:10",
+  },
+];
 
 export default function Home() {
+  // Set dark mode as default
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      document.documentElement.classList.add("dark");
+    }
+  }, []);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // Interactive state
+  const [connected, setConnected] = useState(false);
+  const [userId, setUserId] = useState("");
+  const [username, setUsername] = useState("");
+  const [channel, setChannel] = useState("general");
+  const [showModal, setShowModal] = useState(true);
+  const [messages, setMessages] = useState(initialMessages);
+  const [input, setInput] = useState("");
+
+  useLayoutEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  // Simulate connection (replace with real logic later)
+  function handleConnect(e: React.FormEvent) {
+    e.preventDefault();
+    if (username.trim()) {
+      const newUserId = "u" + Math.floor(Math.random() * 1000);
+      setUserId(newUserId);
+      setConnected(true);
+      setShowModal(false);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: prev.length + 1,
+          type: "user_connected",
+          username,
+          userId: newUserId,
+          text: `${username} has joined the chat.`,
+          timestamp: new Date().toISOString().slice(0, 19).replace("T", " "),
+        },
+      ]);
+    }
+  }
+
+  function handleSend(e: React.FormEvent) {
+    e.preventDefault();
+    if (!input.trim() || !connected) return;
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: prev.length + 1,
+        type: "message",
+        username,
+        userId,
+        text: input,
+        timestamp: new Date().toISOString().slice(0, 19).replace("T", " "),
+      },
+    ]);
+    setInput("");
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+    <div className={clsx("flex min-h-screen items-center justify-center bg-background")}>
+      <Dialog open={!connected && showModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Connect to Chat</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleConnect} className="flex flex-col gap-4">
+            <Input
+              id="username"
+              type="text"
+              placeholder="Username"
+              value={username}
+              onChange={e => setUsername(e.target.value)}
+              required
+              autoFocus
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            <Input
+              id="channel"
+              type="text"
+              placeholder="Channel"
+              value={channel}
+              onChange={e => setChannel(e.target.value)}
+              required
+            />
+            <Button type="submit" className="w-full">Connect</Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+      <main className={clsx("flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-12 px-2 sm:px-8")}>
+        <h1 className={clsx("text-3xl font-bold text-zinc-900 dark:text-white mb-4 text-center")}>
+          Arvin Berina Web Chat Interface
+        </h1>
+        {/* Status & User Info */}
+        <div className={clsx("flex w-full justify-between items-center mb-2")}>
+          <Badge variant={connected ? "default" : "destructive"}>
+            Status: {connected ? "Connected" : "Not Connected"}
+          </Badge>
+          <Badge variant="secondary">
+            User ID: {userId || "-"}
+          </Badge>
+        </div>
+        {/* Chat Area */}
+        <Card className="flex-1 w-full mb-4 border border-zinc-200 dark:border-zinc-700 overflow-y-auto" style={{ minHeight: 320, maxHeight: 400 }}>
+          <CardContent className="p-4">
+            {messages.map((msg) => (
+              <div
+                key={msg.id}
+                className={clsx(
+                  "mb-3 flex",
+                  msg.userId === userId ? "justify-end" : "justify-start"
+                )}
+              >
+                <div
+                  className={clsx(
+                    "max-w-xs px-4 py-2 rounded-lg shadow text-sm break-words",
+                    msg.type === "system" && "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100 text-center mx-auto",
+                    msg.type !== "system" && msg.userId === userId && "bg-green-500 text-white dark:bg-green-600",
+                    msg.type !== "system" && msg.userId !== userId && "bg-zinc-200 text-zinc-900 dark:bg-zinc-700 dark:text-zinc-100"
+                  )}
+                >
+                  {msg.type !== "system" && (
+                    <div className={clsx("font-semibold text-xs mb-1 opacity-80")}>
+                      {msg.username} <span className={clsx("ml-1 text-[10px] opacity-60")}>({msg.userId})</span>
+                    </div>
+                  )}
+                  <div>{msg.text}</div>
+                  <div className={clsx("text-[10px] mt-1 opacity-60 text-right")}>
+                    {msg.timestamp}
+                  </div>
+                </div>
+              </div>
+            ))}
+            <div ref={chatEndRef} />
+          </CardContent>
+        </Card>
+        {/* Message Input */}
+        <form className={clsx("flex w-full gap-2")} onSubmit={handleSend}>
+          <Input
+            type="text"
+            placeholder="Type your message..."
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            disabled={!connected}
+          />
+          <Button type="submit" disabled={!connected || !input.trim()}>
+            Send
+          </Button>
+        </form>
+        <div className={clsx("w-full text-center text-xs text-zinc-400 mt-2")}>
+          <span>{connected ? "WebSocket integration coming soon..." : "Please connect to start chatting."}</span>
         </div>
       </main>
     </div>
-  );
-}
+  )
+};
